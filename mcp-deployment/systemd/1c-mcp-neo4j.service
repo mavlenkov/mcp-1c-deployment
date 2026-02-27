@@ -1,0 +1,15 @@
+[Unit]
+Description=1C MCP Neo4j Database
+After=docker.service network-online.target
+Wants=docker.service network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/mcp
+ExecStart=/usr/local/bin/docker compose -f docker-compose.graph.yml up -d neo4j
+ExecStop=/usr/local/bin/docker compose -f docker-compose.graph.yml stop neo4j
+TimeoutStartSec=180
+
+[Install]
+WantedBy=multi-user.target

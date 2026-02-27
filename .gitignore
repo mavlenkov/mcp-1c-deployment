@@ -1,0 +1,39 @@
+# Environment files with credentials (only .env.example is safe to commit)
+.env
+.env.local
+.env.*.local
+*.env.backup*
+
+# Legacy script with hardcoded credentials
+run_mcp.sh
+
+# Distribution files (large binaries + license keys)
+MCP_Distr/
+
+# Standalone environment files (both .env and env contain credentials)
+FormsServer/.env
+FormsServer/env
+Graph_metadata_search/.env
+Graph_metadata_search/env
+
+# Data directories (created at runtime)
+**/chroma_db/
+**/neo4j/data/
+**/neo4j/logs/
+**/forms_db/
+
+# Claude Code local settings
+.claude/
+
+# OpenSpec session transcripts
+openspec/**/*.jsonl
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

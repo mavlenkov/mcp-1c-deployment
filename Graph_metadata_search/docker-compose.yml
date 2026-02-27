@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/password123
+      # Limit memory to 2GB for Neo4j (increased for better stability)
+      - NEO4J_server_memory_heap_initial__size=512m
+      - NEO4J_server_memory_heap_max__size=1g
+      - NEO4J_server_memory_pagecache_size=512m
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
+      interval: 120s
+      timeout: 60s
+      retries: 10
+      start_period: 60s
+
+  mcp-app:
+    image: comol/1c_graph_metadata:latest
+    container_name: 1c_graph_metadata
+    restart: unless-stopped
+    ports:
+      - "8006:8006"
+    volumes:
+      # IMPORTANT: Mount your host directory containing 1C metadata .txt files
+      # Set METADATA_HOST_PATH in .env to your directory (e.g., E:/OneAPAReport)
+      # It will be automatically mounted to /app/metadata inside the container
+      # 
+      # DO NOT copy files into project's /data folder - always use volume mounts
+      # to reference files directly from their source location
+      - ${METADATA_HOST_PATH}:/app/metadata
+      # Optional: Mount detailed metadata files directory (if METADATA_FILES_HOST_PATH is set)
+      - ${METADATA_FILES_HOST_PATH:-./data}:/app/metadata_files
+      # Mount the fixed main.py to apply driver connection fixes
+      # - ./main.py:/app/main.py:ro
+    environment:
+      # The .env file in the project root is automatically used by docker-compose to substitute these variables.
+      # Only METADATA_HOST_PATH and OPENAI_API_KEY are required - all other paths are set automatically.
+      
+      # License key for application
+      - LICENSE_KEY=${LICENSE_KEY}
+      
+      # OpenAI Configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE=${OPENAI_API_BASE:-https://api.openai.com/v1}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5}
+      - CALCULATE_BUSINESS_INFO=${CALCULATE_BUSINESS_INFO:-false}
+      - OPENAI_EMBEDDING_API_KEY=${OPENAI_EMBEDDING_API_KEY:-${OPENAI_API_KEY}}
+      - OPENAI_EMBEDDING_API_BASE=${OPENAI_EMBEDDING_API_BASE:-${OPENAI_API_BASE:-https://api.openai.com/v1}}
+      - OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL:-text-embedding-ada-002}
+      - OPENAI_TEMPERATURE=${OPENAI_TEMPERATURE:-0.1}
+      - OPENAI_MAX_COMPLETION_TOKENS=${OPENAI_MAX_COMPLETION_TOKENS:-2000}
+      
+      # Neo4j Configuration
+      # Override the NEO4J_URI to connect to the neo4j service in the Docker network
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=${NEO4J_USERNAME:-neo4j}
+      - NEO4J_PASSWORD=password123
+      - NEO4J_DATABASE=${NEO4J_DATABASE:-neo4j}
+      
+      # Metadata Paths
+      # Automatically set to mounted volume path - DO NOT CHANGE
+      - METADATA_DIRECTORY=/app/metadata
+      # Automatically set detailed files path (only used if files exist at this location)
+      - METADATA_FILES=${METADATA_FILES_HOST_PATH:+/app/metadata_files}
+      
+      # MCP Server Configuration
+      - MCP_USE_SSE=${MCP_USE_SSE:-false}
+      - MCP_HOST=${MCP_HOST:-0.0.0.0}
+      - MCP_PORT=${MCP_PORT:-8006}
+      - MCP_PATH=${MCP_PATH:-/mcp}
+      
+      # Feature Flags
+      - SUMMARIZE=${SUMMARIZE:-false}
+      - DEBUG=${DEBUG:-false}
+      - ENABLE_BUSINESS_SEARCH=${ENABLE_BUSINESS_SEARCH:-true}
+      - AUTO_UPDATE_ON_STARTUP=${AUTO_UPDATE_ON_STARTUP:-true}
+      - ASYNC_VECTOR_INDEXING=${ASYNC_VECTOR_INDEXING:-true}
+      
+      # Fine-tuning Parameters
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
+      - INDEX_BATCH_SIZE=${INDEX_BATCH_SIZE:-50}
+      - BUSINESS_INFO_MAX_TOKENS=${BUSINESS_INFO_MAX_TOKENS:-4000}
+      - BUSINESS_INFO_RETRY_COUNT=${BUSINESS_INFO_RETRY_COUNT:-3}
+      - PROJECT_NAME=${PROJECT_NAME:-1C Metadata Project}
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8006/search"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s
+

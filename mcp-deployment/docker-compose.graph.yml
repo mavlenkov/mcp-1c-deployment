@@ -1,0 +1,92 @@
+# ============================================================================
+# MCP СЕРВЕРЫ - GRAPH METADATA SEARCH С NEO4J
+# ============================================================================
+# Графовый поиск по метаданным 1C (предпочтительный вариант)
+# ============================================================================
+
+
+
+services:
+  # -------------------------------------------------------------------------
+  # Neo4j - графовая база данных
+  # -------------------------------------------------------------------------
+  neo4j:
+    image: neo4j:latest
+    container_name: 1c-mcp-neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-password123}
+      - NEO4J_server_memory_heap_initial__size=512m
+      - NEO4J_server_memory_heap_max__size=1g
+      - NEO4J_server_memory_pagecache_size=512m
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
+      interval: 120s
+      timeout: 60s
+      retries: 10
+      start_period: 60s
+
+  # -------------------------------------------------------------------------
+  # 1C Graph Metadata Search - MCP сервер для поиска по метаданным
+  # -------------------------------------------------------------------------
+  1c-graph-metadata:
+    image: comol/1c_graph_metadata:latest
+    container_name: 1c-mcp-graph
+    restart: unless-stopped
+    ports:
+      - "8006:8006"
+    volumes:
+      - "${METADATA_HOST_PATH}:/app/metadata:ro"
+      - "${METADATA_FILES_HOST_PATH}:/app/metadata_files:ro"
+      - "${EXTENSIONS_PATH:-/dev/null}:/app/extensions:ro"
+    environment:
+      - LICENSE_KEY=${LICENSE_KEY_GRAPH}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE=${OPENAI_API_BASE:-https://api.openai.com/v1}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5}
+      - CALCULATE_BUSINESS_INFO=${CALCULATE_BUSINESS_INFO:-false}
+      - OPENAI_EMBEDDING_API_KEY=${OPENAI_EMBEDDING_API_KEY:-${OPENAI_API_KEY}}
+      - OPENAI_EMBEDDING_API_BASE=${OPENAI_EMBEDDING_API_BASE:-${OPENAI_API_BASE:-https://api.openai.com/v1}}
+      - OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL:-text-embedding-ada-002}
+      - OPENAI_TEMPERATURE=${OPENAI_TEMPERATURE:-0.1}
+      - OPENAI_MAX_COMPLETION_TOKENS=${OPENAI_MAX_COMPLETION_TOKENS:-2000}
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USERNAME=${NEO4J_USERNAME:-neo4j}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-password123}
+      - NEO4J_DATABASE=${NEO4J_DATABASE:-neo4j}
+      - METADATA_DIRECTORY=/app/metadata
+      - METADATA_FILES=${METADATA_FILES_HOST_PATH:+/app/metadata_files}
+      - MCP_USE_SSE=${MCP_USE_SSE:-${USESSE}}
+      - MCP_HOST=${MCP_HOST:-0.0.0.0}
+      - MCP_PORT=${MCP_PORT:-8006}
+      - MCP_PATH=${MCP_PATH:-/mcp}
+      - SUMMARIZE=${SUMMARIZE:-false}
+      - DEBUG=${DEBUG:-false}
+      - ENABLE_BUSINESS_SEARCH=${ENABLE_BUSINESS_SEARCH:-true}
+      - AUTO_UPDATE_ON_STARTUP=${AUTO_UPDATE_ON_STARTUP:-true}
+      - ASYNC_VECTOR_INDEXING=${ASYNC_VECTOR_INDEXING:-true}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
+      - INDEX_BATCH_SIZE=${INDEX_BATCH_SIZE:-50}
+      - BUSINESS_INFO_MAX_TOKENS=${BUSINESS_INFO_MAX_TOKENS:-4000}
+      - BUSINESS_INFO_RETRY_COUNT=${BUSINESS_INFO_RETRY_COUNT:-3}
+      - PROJECT_NAME=${PROJECT_NAME:-1C Metadata Project}
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8006/search"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 120s

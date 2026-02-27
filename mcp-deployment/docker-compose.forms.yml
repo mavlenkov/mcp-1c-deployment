@@ -1,0 +1,39 @@
+# ============================================================================
+# MCP СЕРВЕРЫ - FORMSSERVER
+# ============================================================================
+# Контекст для генерации форм
+# ============================================================================
+
+
+
+services:
+  # -------------------------------------------------------------------------
+  # 1C Forms Server - поиск по формам и схемам
+  # -------------------------------------------------------------------------
+  1c-forms:
+    image: comol/1c_forms:latest
+    container_name: 1c-mcp-forms
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8011}:${PORT:-8011}"
+    volumes:
+      - "${DATABASES_PATH}:/databases"
+      - "${MAIN_REPO}:/repo"
+    environment:
+      - LICENSE_KEY=${LICENSE_KEY_FORMS}
+      - DATABASES_PATH=/databases
+      - MAIN_REPO=/repo
+      - USESSE=${USESSE:-false}
+      - INDEX_FORM_EXAMPLES=${INDEX_FORM_EXAMPLES:-true}
+      - GENERATE_FORM_SCHEMA=${GENERATE_FORM_SCHEMA:-false}
+      - RESET_DATABASE=${RESET_DATABASE:-false}
+      - RESET_CACHE=${RESET_CACHE:-false}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_API_BASE=${OPENROUTER_API_BASE}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL}
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8011' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

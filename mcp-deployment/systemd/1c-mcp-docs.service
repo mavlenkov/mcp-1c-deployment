@@ -1,0 +1,14 @@
+[Unit]
+Description=1C MCP Docs Search Server
+After=docker.service network-online.target
+Wants=docker.service network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/mcp
+ExecStart=/usr/local/bin/docker compose up -d 1c-docs
+ExecStop=/usr/local/bin/docker compose stop 1c-docs
+
+[Install]
+WantedBy=multi-user.target

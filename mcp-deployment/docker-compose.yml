@@ -1,0 +1,117 @@
+
+
+services:
+  # -------------------------------------------------------------------------
+  # HelpSearchServer - справка по платформе 1С
+  # -------------------------------------------------------------------------
+  1c-docs:
+    image: comol/1c_help_mcp:latest
+    container_name: 1c-mcp-docs
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
+    environment:
+      - LICENSE_KEY=${LICENSE_KEY_DOCS}
+      - 1C_BIN_PATH=/1c_docs
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      - OPENAI_MODEL=${OPENAI_MODEL}
+      - USESSE=${USESSE}
+    volumes:
+      - "${_1C_BIN_PATH}:/1c_docs:ro"
+      - "${DATA_DIR}/docs_db:/app/chroma_db"
+
+  # -------------------------------------------------------------------------
+  # SyntaxCheckServer - проверка синтаксиса через BSL LS
+  # -------------------------------------------------------------------------
+  1c-syntax:
+    image: comol/1c_syntaxcheck_mcp:latest
+    container_name: 1c-mcp-syntax
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    environment:
+      - LICENSE_KEY=${LICENSE_KEY_SYNTAX}
+      - USESSE=${USESSE}
+
+  # -------------------------------------------------------------------------
+  # CodeMetadataSearchServer - поиск по метаданным и коду конфигурации
+  # -------------------------------------------------------------------------
+  1c-metadata:
+    image: comol/1c_code_metadata_mcp:latest
+    container_name: 1c-mcp-metadata
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - LICENSE_KEY=${LICENSE_KEY_METADATA}
+      - METADATA_PATH=/app/metadata
+      - CODE_PATH=/app/code
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      - OPENAI_MODEL=${OPENAI_MODEL}
+      - RESET_DATABASE=${RESET_DATABASE:-false}
+      - RESET_CACHE=${RESET_CACHE:-false}
+      - USESSE=${USESSE}
+    volumes:
+      - "${METADATA_HOST_PATH}:/app/metadata:ro"
+      - "${CODE_PATH}:/app/code:ro"
+      - "${EXTENSIONS_PATH:-/dev/null}:/app/extensions:ro"
+      - "${DATA_DIR}/metadata_db:/app/chroma_db"
+
+  # -------------------------------------------------------------------------
+  # SSLSearchServer - справка по БСП (Стандартная библиотека подсистем)
+  # -------------------------------------------------------------------------
+  1c-ssl:
+    image: comol/mcp_ssl_server:latest
+    container_name: 1c-mcp-ssl
+    restart: unless-stopped
+    ports:
+      - "8008:8008"
+    environment:
+      - LICENSE_KEY=${LICENSE_KEY_SSL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      - OPENAI_MODEL=${OPENAI_EMBEDDING_MODEL}
+      - SSL_VERSION=${SSL_VERSION}
+      - USESSE=${USESSE}
+    volumes:
+      - "${SSL_PATH}:/app/chroma_db"
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8008' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # -------------------------------------------------------------------------
+  # TemplatesSearchServer - поиск шаблонов кода
+  # -------------------------------------------------------------------------
+  1c-templates:
+    image: comol/template-search-mcp:latest
+    container_name: 1c-mcp-templates
+    restart: unless-stopped
+    ports:
+      - "8004:8004"
+    environment:
+      - LICENSE_KEY=${LICENSE_KEY_TEMPLATES}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      - OPENAI_MODEL=${OPENAI_EMBEDDING_MODEL}
+      - USESSE=${USESSE}
+    volumes:
+      - "${TEMPLATES_PATH}:/app/data"
+
+  # -------------------------------------------------------------------------
+  # 1CCodeChecker - проверка кода через 1С:Напарник
+  # -------------------------------------------------------------------------
+  1c-codechecker:
+    image: comol/1c-code-checker:latest
+    container_name: 1c-mcp-codechecker
+    restart: unless-stopped
+    ports:
+      - "8007:8007"
+    environment:
+      - LICENSE_KEY=${LICENSE_KEY_CODECHECKER}
+      - ONEC_AI_TOKEN=${ONEC_AI_TOKEN}
+      - USESSE=${USESSE}

@@ -1,0 +1,101 @@
+# ============================================================================
+# MCP Forms Server - Docker Compose Configuration
+# ============================================================================
+# Production deployment configuration with:
+# - Persistent volumes for databases and model cache
+# - Configurable environment via .env file
+# - Health checks for container monitoring
+# - Network isolation
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # MCP Forms Server
+  # Main service providing form schema and example search via MCP protocol
+  # ==========================================================================
+  mcp-forms-server:
+    build:
+      context: ..
+      dockerfile: docker_prod/Dockerfile.prod
+    image: mcp-forms-server:latest
+    container_name: mcp-forms-server
+    restart: unless-stopped
+    
+    # Ports
+    # 8011 - MCP server endpoint
+    # 8012 - Health check endpoint
+    ports:
+      - "${PORT:-8011}:${PORT:-8011}"
+      - "${HEALTH_PORT:-8012}:8012"
+    
+    # Volumes
+    volumes:
+      # Database volume - persists forms_knowledge.db and ChromaDB
+      - ${DATABASES_PATH:-./databases}:/databases
+      
+      # Repository volume - 1C configuration files
+      # Mount as read-write if GENERATE_FORM_SCHEMA needs to write schemas
+      - ${MAIN_REPO:-./repo}:/repo
+      
+      # Model cache - persists downloaded embedding models
+      - mcp_model_cache:/app/model_cache
+    
+    # Environment configuration
+    env_file:
+      - .env
+    
+    # Override specific variables if needed
+    environment:
+      # Ensure paths point to container mount points
+      - DATABASES_PATH=/databases
+      - MAIN_REPO=/repo
+    
+    # Health check configuration
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8012/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Network
+    networks:
+      - mcp-net
+    
+    # Resource limits (optional, uncomment to enable)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 4G
+    #     reservations:
+    #       cpus: '0.5'
+    #       memory: 1G
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  # Named volume for model cache persistence
+  mcp_model_cache:
+    driver: local
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  mcp-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+

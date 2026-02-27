@@ -1,0 +1,14 @@
+[Unit]
+Description=1C MCP Forms Server
+After=docker.service network-online.target
+Wants=docker.service network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/mcp
+ExecStart=/usr/local/bin/docker compose -f docker-compose.forms.yml up -d 1c-forms
+ExecStop=/usr/local/bin/docker compose -f docker-compose.forms.yml stop 1c-forms
+
+[Install]
+WantedBy=multi-user.target

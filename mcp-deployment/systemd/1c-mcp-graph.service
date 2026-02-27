@@ -1,0 +1,16 @@
+[Unit]
+Description=1C MCP Graph Metadata Search Server
+After=docker.service network-online.target 1c-mcp-neo4j.service
+Wants=docker.service network-online.target
+Requires=1c-mcp-neo4j.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/mcp
+ExecStart=/usr/local/bin/docker compose -f docker-compose.graph.yml up -d 1c-graph-metadata
+ExecStop=/usr/local/bin/docker compose -f docker-compose.graph.yml stop 1c-graph-metadata
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

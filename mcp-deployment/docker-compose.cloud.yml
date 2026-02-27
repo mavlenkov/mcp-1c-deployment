@@ -1,0 +1,38 @@
+# ============================================================================
+# MCP СЕРВЕРЫ - CLOUD EMBEDDINGS SERVER
+# ============================================================================
+# Облачный сервер параллельных embeddings (альтернатива CodeMetadataSearchServer)
+# ВНИМАНИЕ: использует порт 8000, не запускать одновременно с CodeMetadataSearchServer
+# ============================================================================
+
+services:
+  # -------------------------------------------------------------------------
+  # CloudEmbeddingsServer - облачные параллельные embeddings
+  # -------------------------------------------------------------------------
+  1c-cloud-embeddings:
+    image: comol/1c_cloud_mcp_parallel:latest
+    container_name: 1c-mcp-cloud
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - LICENSE_KEY=${LICENSE_KEY_CLOUD}
+      - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-openrouter}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-${OPENAI_API_KEY}}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      - EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL:-qwen/qwen3-embedding-8b}
+      - EMBEDDING_CONCURRENCY=${EMBEDDING_CONCURRENCY:-10}
+      - EMBEDDING_BATCH_SIZE=${EMBEDDING_BATCH_SIZE:-10}
+      - AUTO_INDEX=${AUTO_INDEX:-true}
+      - USESSE=${USESSE:-false}
+      - SOURCE_PATH=/data/source
+      - CHROMA_PATH=/data/chroma_db
+    volumes:
+      - "${CLOUD_SOURCE_PATH:-${CODE_PATH}}:/data/source:ro"
+      - "${EXTENSIONS_PATH:-/dev/null}:/data/extensions:ro"
+      - "${CLOUD_CHROMA_PATH:-${DATA_DIR}/cloud_embeddings_db}:/data/chroma_db"
+
+networks:
+  default:
+    name: mcp-deployment_default

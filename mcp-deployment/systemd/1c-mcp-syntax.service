@@ -1,0 +1,14 @@
+[Unit]
+Description=1C MCP Syntax Check Server
+After=docker.service network-online.target
+Wants=docker.service network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/mcp
+ExecStart=/usr/local/bin/docker compose up -d 1c-syntax
+ExecStop=/usr/local/bin/docker compose stop 1c-syntax
+
+[Install]
+WantedBy=multi-user.target
