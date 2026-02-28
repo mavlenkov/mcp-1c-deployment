@@ -44,7 +44,7 @@ services:
       - "8006:8006"
     volumes:
       - "${METADATA_HOST_PATH}:/app/metadata:ro"
-      - "${METADATA_FILES_HOST_PATH}:/app/metadata_files:ro"
+      - "${METADATA_FILES_HOST_PATH}:/app/metadata_files"
       - "${EXTENSIONS_PATH:-/dev/null}:/app/extensions:ro"
     environment:
       - LICENSE_KEY=${LICENSE_KEY_GRAPH}
