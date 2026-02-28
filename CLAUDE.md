@@ -57,10 +57,15 @@ All MCP endpoints follow the pattern `http://localhost:<port>/mcp`.
 ## Environment Configuration
 
 Configuration lives in `.env` files (copy from `.env.example`). Key variables:
-- `OPENAI_API_KEY` / `OPENAI_API_BASE` / `OPENAI_MODEL` — Used for embeddings (typically via OpenRouter)
+- `OPENAI_API_KEY` / `OPENAI_API_BASE` — API credentials (typically OpenRouter)
+- `OPENAI_MODEL` — Text generation model (used by Graph server for business descriptions)
+- `OPENAI_EMBEDDING_MODEL` — Embedding model (used by metadata, ssl, templates, graph servers)
 - `LICENSE_KEY_*` — Per-server license keys
 - `DATA_DIR` — Base path for persistent data (default `/opt/mcp-data`)
-- `METADATA_HOST_PATH`, `CODE_PATH`, `SSL_PATH` — Paths to 1C configuration exports
+- `METADATA_HOST_PATH` — Path to configuration report (.txt files from "Конфигурация → Отчёт по конфигурации")
+- `CODE_PATH` / `METADATA_FILES_HOST_PATH` — Path to file export ("Конфигурация → Выгрузить в файлы")
+- `EXTENSIONS_PATH` — Path to extensions file exports (each extension in a subdirectory)
+- `SSL_PATH` — Path to БСП reference data
 - `USESSE` — Enable SSE transport for legacy MCP clients
 - `RESET_DATABASE` / `RESET_CACHE` — Force reindex on startup
 
@@ -68,8 +73,8 @@ Configuration lives in `.env` files (copy from `.env.example`). Key variables:
 
 При обновлении конфигурации 1С необходимо переиндексировать MCP-серверы:
 
-1. Экспортировать конфигурацию из Конфигуратора (Конфигурация → Выгрузить конфигурацию в файлы)
-2. Скопировать файлы в каталог `CODE_PATH` (см. `.env`, по умолчанию `/opt/mcp-data/files`)
+1. Экспортировать конфигурацию из Конфигуратора (Конфигурация → Выгрузить конфигурацию в файлы) в каталог `CODE_PATH`
+2. Сформировать отчёт по конфигурации (Конфигурация → Отчёт по конфигурации → Сохранить в файл) в каталог `METADATA_HOST_PATH`
 3. Запустить переиндексацию:
 
 ```bash
@@ -85,11 +90,11 @@ cd mcp-deployment
 
 Расширения конфигурации 1С можно индексировать наряду с основной конфигурацией:
 
-1. Экспортировать расширения из Конфигуратора (Конфигурация → Расширения → Выгрузить в файлы)
-2. Поместить каждое расширение в отдельный подкаталог в `EXTENSIONS_PATH` (по умолчанию `/opt/mcp-data/extensions`)
+1. Выгрузить расширения в файлы (Конфигурация → Расширения → Выгрузить в файлы) — каждое в подкаталог `EXTENSIONS_PATH`
+2. Сформировать отчёт по расширению (Конфигурация → Расширения → Отчёт по расширению → Сохранить) — положить `.txt` в `METADATA_HOST_PATH` рядом с основным отчётом
 3. Переиндексировать серверы: `./scripts/reindex.sh --config`
 
-Расширения монтируются как read-only volume в контейнеры CodeMetadataSearchServer, CloudEmbeddingsServer и Graph metadata search.
+Файлы расширений монтируются как read-only volume в контейнеры CodeMetadataSearchServer, CloudEmbeddingsServer и Graph metadata search. Отчёты по расширениям читаются из `METADATA_HOST_PATH` вместе с основным отчётом.
 
 ## 1C:Enterprise Code Style
 
