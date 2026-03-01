@@ -46,6 +46,10 @@ services:
       - "${METADATA_HOST_PATH}:/app/metadata:ro"
       - "${METADATA_FILES_HOST_PATH}:/app/metadata_files"
       - "${EXTENSIONS_PATH:-/dev/null}:/app/extensions:ro"
+      # Monkey-patch: sync vector_indexer between web_server and mcp_server modules
+      # Remove after vendor fixes business_search "Vector indexer not initialized" bug
+      - "./patches/graph_run_patch.py:/app/run_patched.py:ro"
+    command: ["python3", "/app/run_patched.py"]
     environment:
       - LICENSE_KEY=${LICENSE_KEY_GRAPH}
       - OPENAI_API_KEY=${OPENAI_API_KEY}

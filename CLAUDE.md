@@ -54,6 +54,10 @@ Subdirectories `FormsServer/` and `Graph_metadata_search/` at the root contain s
 
 All MCP endpoints follow the pattern `http://localhost:<port>/mcp`.
 
+## Known Issues & Patches
+
+- **Graph server `business_search` "Vector indexer not initialized"** (image `comol/1c_graph_metadata:latest`, build 2026-02-08): In web mode, `web_server.combined_lifespan` initializes `web_server.vector_indexer` and `web_server.neo4j_loader`, but the MCP tool `business_search` reads `mcp_server.vector_indexer` / `mcp_server.neo4j_loader` which are never set. Workaround: `mcp-deployment/patches/graph_run_patch.py` mounted as `/app/run_patched.py` syncs the variables via a background thread. Vendor notified. Remove patch after vendor fix.
+
 ## Environment Configuration
 
 Configuration lives in `.env` files (copy from `.env.example`). Key variables:
