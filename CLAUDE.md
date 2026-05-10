@@ -125,4 +125,29 @@ This project uses [OpenSpec](https://github.com/Fission-AI/OpenSpec) for structu
 
 - Full MCP server docs: https://docs.onerpa.ru/mcp-servery-1c
 - 1C cursor rules (must include in project rules): https://github.com/comol/cursor_rules_1c
-- Distribution files with per-server setup instructions: `MCP_Distr/`
+- Distribution files: `MCP_Distr/` (актуальный AI-first дистрибутив с `INSTALL.md` и `config.env` от 15.04.2026; точка входа — `MCP_Distr/INSTALL.md`)
+- Личный кабинет (ротация лицензионных ключей): https://vibecoding1c.ru/
+
+## Vendor Update Workflow (с мая 2026)
+
+После большого вендорского релиза 15.04.2026:
+- Фоновое обновление индексов и fallback во время индексации работают — `RESET_DATABASE=false` обычно достаточно
+- Ключи обновляются **реактивно**: `docker compose pull && up -d`, и только если в логах появилось `Invalid LICENSE_KEY` — обновлять `LICENSE_KEY_*` в `.env` из `MCP_Distr/config.env` (с маппингом имён: alcor `LICENSE_KEY_DOCS` ↔ vendor `LICENSE_KEY_HELP`, alcor `LICENSE_KEY_METADATA` ↔ vendor `LICENSE_KEY_CODEMETADATA`)
+- Образы `:latest` содержат локальную модель E5, но при `OPENAI_EMBEDDING_MODEL=qwen/qwen3-embedding-8b` в `.env` фактически работают на cloud-embeddings — локальная модель не используется
+
+## Источники данных 1С (mai 2026)
+
+Источники для синхронизации на alcor — раздельные:
+- Отчёты: `~/LISmcp/report/` (в т.ч. `ОтчетПоКонфигурации.txt`, `ОтчетПоРасширениюЕвротест.txt`, `ОтчетПоРасширениюЛОДЭ.txt`)
+- Основная конфигурация: `~/Проекты/ЛИС1С/` (git-проект-выгрузка)
+- Расширение Евротест: `~/Проекты/ЕвротестРасширение/` (git-проект-выгрузка)
+- Расширение ЛОДЭ: пока без отдельного git-проекта (на alcor — снимок от 21.03.2026)
+
+При rsync на alcor:
+- `~/LISmcp/report/` → `alcor:~/mcp/LISreport/`
+- `~/Проекты/ЛИС1С/` → `alcor:~/mcp/LISfiles/`
+- `~/Проекты/ЕвротестРасширение/` → `alcor:~/mcp/extensions/Евротест/`
+
+ВАЖНО при `--delete`:
+- Использовать whitelist стандартных 1С-структур (Catalogs, Documents, ... — список в openspec changes), НЕ blacklist (в git-проектах есть много dev-артефактов вплоть до больших файлов)
+- Защищать `business_info.html` через `--exclude='business_info.html'` ПЕРЕД whitelist'ом — это артефакты Graph-сервера, ~1300+ файлов, генерируются через LLM-запросы к OpenRouter

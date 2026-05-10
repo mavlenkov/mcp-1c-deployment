@@ -9,6 +9,7 @@ run_mcp.sh
 
 # Distribution files (large binaries + license keys)
 MCP_Distr/
+MCP_Distr.zip
 
 # Standalone environment files (both .env and env contain credentials)
 FormsServer/.env
