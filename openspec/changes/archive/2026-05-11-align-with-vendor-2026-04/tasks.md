@@ -171,8 +171,8 @@ ONEC_FILTER_EXT=(
 
 ## 8. Коммит и архив
 
-- [ ] 8.1 `git add .gitignore openspec/changes/align-with-vendor-2026-04/ CLAUDE.md`
-- [ ] 8.2 Закоммитить с описательным сообщением
+- [x] 8.1 `git add .gitignore openspec/changes/align-with-vendor-2026-04/ CLAUDE.md`
+- [x] 8.2 Закоммитить — commit 8d88f3c
 - [ ] 8.3 Push в origin (после явного ОК пользователя)
 - [ ] 8.4 После приёма пользователем — `openspec archive align-with-vendor-2026-04`
 
