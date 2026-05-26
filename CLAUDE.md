@@ -56,7 +56,9 @@ All MCP endpoints follow the pattern `http://localhost:<port>/mcp`.
 
 ## Known Issues & Patches
 
-- **Graph server `business_search` "Vector indexer not initialized"** (image `comol/1c_graph_metadata:latest`, build 2026-02-08): In web mode, `web_server.combined_lifespan` initializes `web_server.vector_indexer` and `web_server.neo4j_loader`, but the MCP tool `business_search` reads `mcp_server.vector_indexer` / `mcp_server.neo4j_loader` which are never set. Workaround: `mcp-deployment/patches/graph_run_patch.py` mounted as `/app/run_patched.py` syncs the variables via a background thread. Vendor notified. Remove patch after vendor fix.
+- **~~Graph server `business_search` "Vector indexer not initialized"~~ FIXED by vendor (image 2026-05-08, verified 2026-05-26)**: Was a web-mode init bug (`web_server.vector_indexer`/`neo4j_loader` never synced to `mcp_server.*`). Worked around via `graph_run_patch.py` until the 2026-05-08 image fixed it. Patch removed (`command`/volume-mount dropped from `docker-compose.graph.yml`, file deleted). `business_search` verified working without the patch.
+- **~~Graph `business_search` Cypher SyntaxError on Neo4j 2026.04.0~~ FIXED by vendor (image 2026-05-08, verified 2026-05-26)**: 2026-05-10 image generated invalid `SEARCH node IN (...)` Cypher; the 2026-05-08-built image pulled on 2026-05-26 no longer does. Bug report kept at `mcp-deployment/REPORT-2026-05-11-graph-business-search-cypher.md` for reference.
+- **business_info descriptions returned as raw HTML** (still present): `business_search` returns object descriptions verbatim as `<!DOCTYPE html>...`. Cosmetic data issue — vendor strips Cypher error but not HTML markup. Low priority.
 
 ## Environment Configuration
 
