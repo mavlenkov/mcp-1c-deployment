@@ -86,9 +86,5 @@ services:
     depends_on:
       neo4j:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8006/search"]
-      interval: 60s
-      timeout: 30s
-      retries: 5
-      start_period: 120s
+    # healthcheck убран: образ не отдаёт 200 на GET /search (это MCP-эндпоинт, не health),
+    # из-за чего контейнер вечно висел "unhealthy" при полностью рабочем сервере. Косметика.
