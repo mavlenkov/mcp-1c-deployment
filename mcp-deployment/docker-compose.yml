@@ -17,6 +17,8 @@ services:
       - OPENAI_API_BASE=${OPENAI_API_BASE}
       - OPENAI_MODEL=${OPENAI_MODEL}
       - USESSE=${USESSE}
+      # Без этого образ дефолтит RESET_DATABASE=True и переиндексирует docs (~15 мин) при каждом рестарте
+      - RESET_DATABASE=${RESET_DATABASE:-false}
     volumes:
       - "${_1C_BIN_PATH}:/1c_docs:ro"
       - "${DATA_DIR}/docs_db:/app/chroma_db"
@@ -76,7 +78,7 @@ services:
       - SSL_VERSION=${SSL_VERSION}
       - USESSE=${USESSE}
     volumes:
-      - "${SSL_PATH}:/app/chroma_db"
+      - "${SSL_PATH}:/app/zvec_db"
     healthcheck:
       test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8008' || exit 1"]
       interval: 30s
@@ -100,7 +102,7 @@ services:
       - OPENAI_MODEL=${OPENAI_EMBEDDING_MODEL}
       - USESSE=${USESSE}
     volumes:
-      - "${TEMPLATES_PATH}:/app/data"
+      - "${TEMPLATES_PATH}:/app/chroma_db"
 
   # -------------------------------------------------------------------------
   # 1CCodeChecker - проверка кода через 1С:Напарник

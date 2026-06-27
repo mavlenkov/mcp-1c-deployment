@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This repository manages Docker-based MCP (Model Context Protocol) servers for 1C:Enterprise development. All servers run as Docker containers from pre-built `comol/*` images — there is no application source code to build here, only deployment configuration.
+This repository manages Docker-based MCP (Model Context Protocol) servers for 1C:Enterprise development. All servers run as Docker containers from pre-built `comol/*` images — there is no application source code to build here, only deployment configuration. There are no tests, build, or lint steps; "running" the project means starting/managing containers.
+
+> `AGENTS.md` (root) is an older overlapping guide kept for other tools. **This `CLAUDE.md` is canonical** — prefer it when the two disagree.
 
 ## Key Commands
 
@@ -72,8 +74,16 @@ Configuration lives in `.env` files (copy from `.env.example`). Key variables:
 - `CODE_PATH` / `METADATA_FILES_HOST_PATH` — Path to file export ("Конфигурация → Выгрузить в файлы")
 - `EXTENSIONS_PATH` — Path to extensions file exports (each extension in a subdirectory)
 - `SSL_PATH` — Path to БСП reference data
-- `USESSE` — Enable SSE transport for legacy MCP clients
-- `RESET_DATABASE` / `RESET_CACHE` — Force reindex on startup
+- `USESSE` — Transport selector. **Set `USESSE=false`** for modern clients (Claude Code expects Streamable HTTP); `true` only for legacy SSE clients. Switching transports recreates containers, which can surface `Invalid LICENSE_KEY` if keys are stale (see Vendor Update Workflow). Background: `mcp-deployment/REPORT-2026-03-02-streamable-http.md`.
+- `RESET_DATABASE` / `RESET_CACHE` — Force reindex on startup. **Gotcha:** the in-container default for `RESET_DATABASE` is `True`, so any service that omits it reindexes from scratch on *every* restart (e.g. docs = ~15 min, 300+ MB ChromaDB). Always pass `RESET_DATABASE=false` explicitly for normal runs.
+
+### Persistence volumes
+
+Indexed data persists via named/host volumes mounted at the container's vector-DB path (Neo4j uses its own data volume). The path is **per-server and version-dependent** — mounting elsewhere silently loses the index across restarts:
+- Most servers (docs, metadata, templates): **`/app/chroma_db`** (ChromaDB). Historic mistakes: templates was once `/app/data`.
+- **SSLSearchServer (since the 2026-06 image): `/app/zvec_db`** — vendor migrated from ChromaDB to zvec. Old `/app/chroma_db` data is unused; reindex happens on first run of the new image.
+
+When bumping an image, check the server doc in `MCP_Distr/servers/` for the current container volume path before assuming it's unchanged.
 
 ## Обновление конфигурации 1С
 
@@ -141,7 +151,7 @@ This project uses [OpenSpec](https://github.com/Fission-AI/OpenSpec) for structu
 
 Источники для синхронизации на alcor — раздельные:
 - Отчёты: `~/LISmcp/report/` (в т.ч. `ОтчетПоКонфигурации.txt`, `ОтчетПоРасширениюЕвротест.txt`, `ОтчетПоРасширениюЛОДЭ.txt`)
-- Основная конфигурация: `~/Проекты/ЛИС1С/` (git-проект-выгрузка)
+- Основная конфигурация: `~/Проекты/ЛИС1С/` (каталог выгрузки из Конфигуратора, **не git**)
 - Расширение Евротест: `~/Проекты/ЕвротестРасширение/` (git-проект-выгрузка)
 - Расширение ЛОДЭ: пока без отдельного git-проекта (на alcor — снимок от 21.03.2026)
 

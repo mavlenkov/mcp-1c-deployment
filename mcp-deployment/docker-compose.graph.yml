@@ -73,14 +73,16 @@ services:
       - AUTO_UPDATE_ON_STARTUP=${AUTO_UPDATE_ON_STARTUP:-true}
       - ASYNC_VECTOR_INDEXING=${ASYNC_VECTOR_INDEXING:-true}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
-      - INDEX_BATCH_SIZE=${INDEX_BATCH_SIZE:-50}
+      - INDEX_BATCH_SIZE=${INDEX_BATCH_SIZE:-512}
+      - MAX_TOKENS_PER_BATCH=${MAX_TOKENS_PER_BATCH:-28000}
+      - EMBEDDING_REQUEST_CONCURRENCY=${EMBEDDING_REQUEST_CONCURRENCY:-6}
       - BUSINESS_INFO_MAX_TOKENS=${BUSINESS_INFO_MAX_TOKENS:-4000}
       - BUSINESS_INFO_RETRY_COUNT=${BUSINESS_INFO_RETRY_COUNT:-3}
       - PROJECT_NAME=${PROJECT_NAME:-1C Metadata Project}
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 4G
     depends_on:
       neo4j:
         condition: service_healthy
