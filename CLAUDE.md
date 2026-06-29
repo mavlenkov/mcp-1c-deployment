@@ -80,8 +80,9 @@ Configuration lives in `.env` files (copy from `.env.example`). Key variables:
 ### Persistence volumes
 
 Indexed data persists via named/host volumes mounted at the container's vector-DB path (Neo4j uses its own data volume). The path is **per-server and version-dependent** — mounting elsewhere silently loses the index across restarts:
-- Most servers (docs, metadata, templates): **`/app/chroma_db`** (ChromaDB). Historic mistakes: templates was once `/app/data`.
-- **SSLSearchServer (since the 2026-06 image): `/app/zvec_db`** — vendor migrated from ChromaDB to zvec. Old `/app/chroma_db` data is unused; reindex happens on first run of the new image.
+- docs, templates: **`/app/chroma_db`** (ChromaDB). Historic mistakes: templates was once `/app/data`.
+- **SSLSearchServer (since the 2026-06 image): `/app/zvec_db`** — vendor migrated from ChromaDB to zvec; the mount path itself changed. Old `/app/chroma_db` data is unused; reindex happens on first run of the new image.
+- **CodeMetadataSearchServer (since the 2026-06 image): zvec engine, but still mounted at `/app/chroma_db`.** The vector engine migrated to zvec (logs show `vectorindexer.zvec_store`, `zvec optimize DONE …`), yet — unlike SSL — the container path did NOT change, so the existing volume keeps working and data persists fine (no reindex needed on upgrade). Takeaway: the on-disk *engine* and the *mount path name* are independent — don't rename the metadata mount to `/app/zvec_db` just because the engine changed (that would orphan the index and force a full reindex).
 
 When bumping an image, check the server doc in `MCP_Distr/servers/` for the current container volume path before assuming it's unchanged.
 
