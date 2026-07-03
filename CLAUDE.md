@@ -113,6 +113,32 @@ cd mcp-deployment
 
 Файлы расширений монтируются как read-only volume в контейнеры CodeMetadataSearchServer, CloudEmbeddingsServer и Graph metadata search. Отчёты по расширениям читаются из `METADATA_HOST_PATH` вместе с основным отчётом.
 
+### Graph: индексация расширения поверх уже заполненного Neo4j
+
+Особенность graph-сервера: structural resume gate скипает parse+load, если в Neo4j уже есть объекты проекта — простой рестарт или `RESET_DATABASE=true` **не** подхватят новый отчёт (`RESET_DATABASE` у graph сбрасывает только векторные индексы, Neo4j не трогает; полная очистка проекта — `python /app/run.py index --clear`, вызывает `clear_project_data`).
+
+Правильный путь — вендорский механизм расширений, разовым прогоном **без** reset (проверено на Гистологии, 2026-07-03). Resume gate scope-aware: при заданном `EXTENSION_NAME` скип срабатывает только если объекты именно этого расширения уже в графе, поэтому прогон поверх заполненной базы работает:
+
+```bash
+# 1. Каталог только с отчётом расширения (иначе base-отчёт перезагрузится с origin=extension)
+docker exec 1c-mcp-graph sh -c 'mkdir -p /tmp/ext_metadata && cp "/app/metadata/ОтчетПоРасширению<Имя>.txt" /tmp/ext_metadata/'
+# 2. Разовый прогон (5-10 сек на расширение ~400 объектов); business info выключаем —
+#    живой сервер догенерирует в фоне после рестарта
+docker exec \
+  -e EXTENSION_NAME=<Имя> -e EXTENSION_BASE_PROJECT=LISmcp \
+  -e METADATA_DIRECTORY=/tmp/ext_metadata \
+  -e METADATA_FILES=/app/extensions/<Имя> -e CODE_EXPORT_PATH=/app/extensions/<Имя> \
+  -e CALCULATE_BUSINESS_INFO=false -e BACKGROUND_POST_INDEXING=false \
+  1c-mcp-graph python /app/run.py index
+# 3. Уборка и рестарт — фоновые задачи сгенерируют business info и эмбеддинги для новых объектов
+docker exec 1c-mcp-graph rm -rf /tmp/ext_metadata && docker restart 1c-mcp-graph
+```
+
+Прогон создаёт объекты с `origin="extension"`, `extension_name=<Имя>` и связи EXTENDS/OVERRIDES с базой. BSL reconcile трогает только отсканированные модули — base-модули вне скана не удаляются. Нюансы:
+- `EXTENSION_BASE_PROJECT` = `PROJECT_NAME` базовой конфигурации (у нас `LISmcp`).
+- Исторический факт: Евротест и ЛОДЭ попали в граф иначе — при первичной индексации их отчёты уже лежали в `METADATA_HOST_PATH` и были распарсены как `origin="base"` без extension-связей. Работает для поиска, но EXTENDS/OVERRIDES у них нет. Повторный extension-прогон для них не делать без проверки на дубли (объекты уже есть под тем же filename).
+- Полный reindex с очисткой чистит проект целиком, включая расширения — после него extension-прогоны нужно повторить.
+
 ## 1C:Enterprise Code Style
 
 When generating 1C:Enterprise code through these MCP servers:

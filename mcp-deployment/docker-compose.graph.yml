@@ -72,6 +72,33 @@ services:
       - ENABLE_BUSINESS_SEARCH=${ENABLE_BUSINESS_SEARCH:-true}
       - AUTO_UPDATE_ON_STARTUP=${AUTO_UPDATE_ON_STARTUP:-true}
       - ASYNC_VECTOR_INDEXING=${ASYNC_VECTOR_INDEXING:-true}
+      - ENABLE_METADATA_DESCRIPTION_EMBEDDING=${ENABLE_METADATA_DESCRIPTION_EMBEDDING:-true}
+      - ENABLE_CODE_SEARCH=${ENABLE_CODE_SEARCH:-true}
+      # RESET_DATABASE для graph сбрасывает только векторные индексы, НЕ Neo4j.
+      # Полная очистка графа — clear_project_data (python run.py index --clear) или удаление volume Neo4j.
+      - RESET_DATABASE=${RESET_DATABASE:-false}
+      - BACKGROUND_POST_INDEXING=${BACKGROUND_POST_INDEXING:-true}
+      # Template Mode
+      - TEMPLATE_MODE_ENABLED=${TEMPLATE_MODE_ENABLED:-true}
+      - TEMPLATE_MODE_ONLY=${TEMPLATE_MODE_ONLY:-false}
+      # BSL Code Graph
+      - LOAD_BSL_SIGNATURES=${LOAD_BSL_SIGNATURES:-true}
+      - CODE_EXPORT_PATH=${METADATA_FILES_HOST_PATH:+/app/metadata_files}
+      - ENABLE_ROUTINE_EMBEDDINGS=${ENABLE_ROUTINE_EMBEDDINGS:-true}
+      - LOAD_FORMS_FROM_XML=${LOAD_FORMS_FROM_XML:-false}
+      # XML Data Sources
+      - LOAD_EVENT_SUBSCRIPTIONS=${LOAD_EVENT_SUBSCRIPTIONS:-false}
+      - LOAD_PREDEFINED_VALUES=${LOAD_PREDEFINED_VALUES:-false}
+      - LOAD_ROLE_RIGHTS=${LOAD_ROLE_RIGHTS:-false}
+      - LOAD_HELP_FROM_HTML=${LOAD_HELP_FROM_HTML:-false}
+      # Extension Support: разовый прогон индексации расширения поверх базы
+      # (resume gate scope-aware: при заданном EXTENSION_NAME скип только если
+      # объекты этого расширения уже в Neo4j). EXTENSION_BASE_PROJECT должен
+      # совпадать с PROJECT_NAME базовой конфигурации.
+      - EXTENSION_NAME=${EXTENSION_NAME:-}
+      - EXTENSION_BASE_PROJECT=${EXTENSION_BASE_PROJECT:-}
+      # Fine-tuning
+      - EMBEDDING_ALLOW_OFFLINE_FALLBACK=${EMBEDDING_ALLOW_OFFLINE_FALLBACK:-true}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
       - INDEX_BATCH_SIZE=${INDEX_BATCH_SIZE:-512}
       - MAX_TOKENS_PER_BATCH=${MAX_TOKENS_PER_BATCH:-28000}
