@@ -14,6 +14,9 @@ MCP_Distr.zip
 # Audit workspace (extracted distributions contain license keys)
 .audit/
 
+# Staging for 1C exports before rsync to alcor
+staging/
+
 # Standalone environment files (both .env and env contain credentials)
 FormsServer/.env
 FormsServer/env
