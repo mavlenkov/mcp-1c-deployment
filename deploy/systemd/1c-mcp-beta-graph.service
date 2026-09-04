@@ -1,0 +1,17 @@
+[Unit]
+Description=1C MCP graph metadata search + Neo4j (beta contour)
+Requires=docker.service 1c-mcp-beta-core.service
+After=docker.service 1c-mcp-beta-core.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/l7777/mcp/deploy
+ExecStart=/usr/bin/docker compose -f graph/docker-compose.yml --env-file graph/.env up -d
+ExecStop=/usr/bin/docker compose -f graph/docker-compose.yml --env-file graph/.env stop
+User=l7777
+Group=docker
+TimeoutStartSec=600
+
+[Install]
+WantedBy=multi-user.target

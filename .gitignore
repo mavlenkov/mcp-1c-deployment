@@ -11,6 +11,9 @@ run_mcp.sh
 MCP_Distr/
 MCP_Distr.zip
 
+# Audit workspace (extracted distributions contain license keys)
+.audit/
+
 # Standalone environment files (both .env and env contain credentials)
 FormsServer/.env
 FormsServer/env

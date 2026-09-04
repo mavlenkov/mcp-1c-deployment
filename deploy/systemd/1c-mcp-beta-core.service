@@ -1,0 +1,17 @@
+[Unit]
+Description=1C MCP core servers (beta contour)
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/home/l7777/mcp/deploy
+ExecStart=/usr/bin/docker compose up -d
+ExecStop=/usr/bin/docker compose stop
+User=l7777
+Group=docker
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

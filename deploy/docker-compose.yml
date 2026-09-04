@@ -1,0 +1,166 @@
+# ============================================================================
+# MCP СЕРВЕРЫ 1С — BETA-КОНТУР (greenfield 2026-09, вендорская схема 2026-08-30)
+# ============================================================================
+# Источник истины: MCP_Distr 2026-08-30 (INSTALL.md + servers/*.md).
+# Канал: beta для всех серверов (явное решение владельца 2026-09-04).
+# Изоляция beta: имена *_beta, host-порты 81xx, каталоги БД *_beta.
+# Stable-контур отсутствует (снесён); при возврате stable он займёт 80xx.
+# Все порты — только 127.0.0.1 (требование вендора; Templates memory без auth).
+# ============================================================================
+
+x-embedding-env: &embedding-env
+  EMBEDDING_API_BASE: ${EMBEDDING_API_BASE:?задай в .env}
+  EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:?задай в .env}
+  EMBEDDING_MODEL: ${EMBEDDING_MODEL:-qwen/qwen3-embedding-8b}
+
+x-common-env: &common-env
+  USESSE: "false"
+  RESET_DATABASE: "false"
+  RESET_CACHE: "false"
+
+services:
+  # ------------------------------------------------------------------
+  # HelpSearchServer — справка платформы 1С (beta: БД /app/index!)
+  # ------------------------------------------------------------------
+  help:
+    image: comol/1c_help_mcp:light-beta
+    container_name: 1c_help_mcp_beta
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8103:8003"
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY_HELP_BETA:?}
+      1C_BIN_PATH: /1c_docs
+      <<: [*common-env, *embedding-env]
+    volumes:
+      - "${PATH_1C_BIN:?}:/1c_docs"
+      - "${PATH_BASES:?}/mcp_docs_beta:/app/index"
+    healthcheck:
+      # healthcheck образа смотрит /ready: 'starting' во время индексации = норма
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8003/ready', timeout=10).status==200 else 1)\" || exit 1"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
+
+  # ------------------------------------------------------------------
+  # CodeMetadataSearchServer — метаданные/код/формы конфигурации
+  # ------------------------------------------------------------------
+  codemetadata:
+    image: comol/1c_code_metadata_mcp:light-beta
+    container_name: 1c_code_metadata_mcp_beta
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8100:8000"
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY_CODEMETADATA_BETA:?}
+      CODE_PATH: /app/code
+      SOURCE_FORMAT: auto
+      <<: [*common-env, *embedding-env]
+    volumes:
+      - "${PATH_CODE:?}:/app/code:ro"
+      # Путь БД остаётся /app/chroma_db даже на zvec-движке — не переименовывать!
+      - "${PATH_BASES:?}/mcp_codemetadata_beta:/app/chroma_db"
+    healthcheck:
+      # /live = процесс жив; готовность к поиску — только /ready (status.sh)
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/live', timeout=10).status==200 else 1)\" || exit 1"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
+
+  # ------------------------------------------------------------------
+  # SSLSearchServer — справка БСП (zvec, /app/zvec_db)
+  # ------------------------------------------------------------------
+  ssl:
+    image: comol/mcp_ssl_server:light-beta
+    container_name: 1c_ssl_mcp_beta
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8108:8008"
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY_SSL_BETA:?}
+      SSL_VERSION: ${SSL_VERSION:-3.1.11}
+      <<: [*common-env, *embedding-env]
+    volumes:
+      - "${PATH_BASES:?}/mcp_ssl_beta:/app/zvec_db"
+    healthcheck:
+      # /health у этого сервера нет — только /ready
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8008/ready', timeout=10).status==200 else 1)\" || exit 1"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
+
+  # ------------------------------------------------------------------
+  # TemplatesSearchServer — шаблоны + проектная память (remember/recall)
+  # ------------------------------------------------------------------
+  templates:
+    image: comol/template-search-mcp:light-beta
+    container_name: 1c_templates_mcp_beta
+    restart: unless-stopped
+    ports:
+      # remember/recall без авторизации — порт ТОЛЬКО loopback
+      - "127.0.0.1:8104:8004"
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY_TEMPLATES_BETA:?}
+      <<: [*common-env, *embedding-env]
+      # Пишущая поверхность выключена (память работает и без неё):
+      MCP_ENABLE_WRITE_TOOLS: "false"
+    volumes:
+      - "${PATH_BASES:?}/mcp_templates_beta:/app/chroma_db"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8004/ready', timeout=10).status==200 else 1)\" || exit 1"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
+
+  # ------------------------------------------------------------------
+  # SyntaxCheckServer — BSL LS (beta: TOON-ответы, syntaxcheck_file, FULLINDEX)
+  # light-beta не существует — только latest-beta
+  # ------------------------------------------------------------------
+  syntaxcheck:
+    image: comol/1c_syntaxcheck_mcp:latest-beta
+    container_name: 1c_syntaxcheck_mcp_beta
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8102:8002"
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY_SYNTAX_BETA:?}
+      USESSE: "false"
+      FILES_DIR: /files
+      FULLINDEX: "true"
+    volumes:
+      - "${PATH_CODE:?}:/files:ro"
+      - "1c_syntaxcheck_index_beta:/index"
+    # HTTP-эндпоинтов нет вообще — healthcheck внутренний (в образе)
+
+  # ------------------------------------------------------------------
+  # 1CCodeChecker — проверка через 1С:Напарник
+  # ONEC_AI_TOKEN — ТОЛЬКО внешний env-файл вне репозитория (vendor contract)
+  # ------------------------------------------------------------------
+  codechecker:
+    image: comol/1c-code-checker:light-beta
+    container_name: 1c_code_checker_beta
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8107:8007"
+    env_file:
+      - ${ONEC_ENV_FILE:-/home/l7777/.mcp-secrets/1c-code-checker.env}
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY_CODECHECKER_BETA:?}
+      USESSE: "false"
+      ONEC_AI_WORKSPACE_PATH_MAP: "${PATH_CODE:?}=/workspace"
+    volumes:
+      - "${PATH_CODE:?}:/workspace:ro"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8007/health', timeout=10).status==200 else 1)\" || exit 1"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  1c_syntaxcheck_index_beta:
+    name: 1c_syntaxcheck_index_beta
