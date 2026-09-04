@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **⚠️ МИГРАЦИЯ 2026-09-04 (в процессе):** старый стек (этот файл, `mcp-deployment/`,
+> корневой `docker-compose.yml`, `run_mcp.sh`) снесён на alcor. Действующий контур —
+> **`deploy/` (beta-канал вендорского дистрибутива 2026-08-30, порты 81xx, loopback)**:
+> смотри `deploy/README.md`. Остаток этого файла описывает legacy-мир и будет
+> переписан после завершения приёмки.
+
 ## Project Overview
 
 This repository manages Docker-based MCP (Model Context Protocol) servers for 1C:Enterprise development. All servers run as Docker containers from pre-built `comol/*` images — there is no application source code to build here, only deployment configuration. There are no tests, build, or lint steps; "running" the project means starting/managing containers.
