@@ -1,7 +1,6 @@
 # Подключение клиентов к новому контуру (beta, 2026-09-04)
 
-> Черновик до завершения приёмки. Финальная версия — после green по всем readiness
-> и регистрации проекта в graph.
+> Приёмка пройдена 05.09.2026: все 7 серверов green, включая scoped-инструменты graph.
 
 ## Endpoints (все — только 127.0.0.1 на alcor)
 
@@ -27,6 +26,8 @@
    база `LISmcp` + слои `Евротест`, `Гистология` (и `ЛОДЭ`, когда будет свежая выгрузка).
    Для «эффективного» вида с учётом слоёв: `resolve_effective_entity`,
    `compare_base_and_extension(object_name, extension_name)`.
+   NB: `GRAPH_SCOPE_MIGRATION_WINDOW=true` обязателен — boot-индексация не промоутит
+   генерации, без окна проект не виден scoped-инструментам (`project_not_accessible`).
 3. **`execute_metadata_cypher` убран вендором** — вместо него `run_graph_cypher_template`
    и предметные инструменты (54 шт.).
 4. **SyntaxCheck**: новый инструмент `syntaxcheck_file` (проверка файла из полного
