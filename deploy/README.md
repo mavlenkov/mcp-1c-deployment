@@ -30,7 +30,37 @@ scripts/logs.sh <имя> -f  # логи (help|codemeta|ssl|templates|syntaxcheck
 scripts/reindex.sh <сервер>   # RESET_DATABASE=true на прогон → возврат false
 scripts/reindex.sh graph --full  # полная перестройка графа (WIPE, часы)
 scripts/update.sh [svc...]    # pull → backup-rename → up → проверка лицензий
+deploy/smoke/tools_snapshot.py # сверка tools/list со снапшотом (через туннель)
 ```
+
+## Обновление кодовой базы 1С (НОВОЕ, 2026-09-05)
+
+1. Свежая выгрузка rsync'ом в `~/mcp/LISfiles/` (и `~/mcp/extensions/<Имя>/`),
+   с `--exclude='business_info.html'` ПЕРЕД whitelist-фильтрами.
+2. **codemeta**: `scripts/reindex.sh codemeta` (полная переиндексация, ~40 мин).
+3. **graph — БЕЗ полной перестройки**: incremental refresh по manifest'у
+   (сохраняет business-описания и эмбеддинги; полный rebuild через refresh их СОТРЁТ):
+
+   ```
+   MCP tools/call refresh_graph_project {
+     project_id: "LISmcp", mode: "incremental",
+     changed_paths: ["CommonModules/<Имя>/Ext/Module.bsl", ...]  # от корня выгрузки
+   }
+   ```
+   Проверено 05.09: 1 модуль = 120 мс, проект промоутит generation (is_accessible=true).
+   Без `changed_paths` (вся выгрузка) — план на ~12k unit'ов; у части типов
+   (forms, role_rights, dcs_template...) нет per-unit обновления → сервер ОТКАЖЕТ
+   и предложит mode=full. Тогда — `scripts/reindex.sh graph --full` (часы, токены
+   на business_info заново).
+4. **Расширения**: добавить/удалить/обновить каталог в `~/mcp/extensions/` →
+   `docker restart 1c_graph_metadata_beta` — catalog сам перечитает слои
+   (SYNC=true уберёт исчезнувшие). codemeta расширения индексирует вместе с базой
+   при reindex (CODE_PATH общий).
+5. После `update.sh` — прогнать smoke: `tools_snapshot.py` (drift схем beta).
+
+ВАЖНО: `GRAPH_SCOPE_MIGRATION_WINDOW=true` держать ВКЛЮЧЁННЫМ — boot-индексация
+не промоутит генерации, без окна проект недоступен scoped-инструментам
+(проверено: с false list_graph_projects пуст даже при заполненном графе).
 
 ## Секреты
 
