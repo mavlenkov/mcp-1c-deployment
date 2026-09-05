@@ -65,6 +65,9 @@ services:
       EXTENSIONS_PATH: ${EXTENSIONS_PATH:-/app/extensions}
       EXTENSION_ORDER_MANIFEST: ${EXTENSION_ORDER_MANIFEST:-}
       EXTENSION_CATALOG_SYNC: ${EXTENSION_CATALOG_SYNC:-true}
+      # Manifest refresh: refresh_graph_project обновляет проект на месте,
+      # сохраняя business-описания и эмбеддинги (иначе refresh=full rebuild)
+      SOURCE_UNIT_MANIFEST_ENABLED: ${SOURCE_UNIT_MANIFEST_ENABLED:-true}
       # Чистая Neo4j (greenfield) — scope включаем сразу
       MCP_NAMESPACE: ${MCP_NAMESPACE:-default}
       GRAPH_SCOPE_ENFORCED: ${GRAPH_SCOPE_ENFORCED:-true}
