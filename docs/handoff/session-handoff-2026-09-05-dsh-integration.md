@@ -20,7 +20,13 @@ Greenfield-перестройка MCP-стека 1С на alcor ЗАВЕРШЕН
   templates (+write-гейт 403) ✅, syntaxcheck_file ✅, checker (ONEC-токен) ✅.
 - Локально (машина DSH): systemd user unit `mcp-1c-tunnel` (LocalForward 8100-8108
   → alcor), linger включён. GPT-6 Astra добавлена в settings.yaml (openai-codex,
-  id `gpt-6-astra`), проверена реальным вызовом.
+  id `gpt-6-astra`), проверена реальным вызовом. NB: явный `models:` в settings
+  ПЕРЕКРЫВАЕТ автокаталог pi-ai — там перечислены все модели (sol/terra/luna/…),
+  не удалять.
+- Коллегия по DSH-интеграции завершена 4/4 (Astra, Sol, GLM, K3): консенсус —
+  гибрид (мост + allowlist + skill-runbook), роль Astra = эскалационный рецензент.
+  Дополнения Sol: generic mcp1c_call — deny-by-default/экспертный путь, телеметрия
+  (correlation id, latency), circuit breaker, приёмка включает обрыв туннеля.
 
 ## На чём остановились / следующий согласованный шаг
 
@@ -45,7 +51,6 @@ Workflow разработки — по скиллу cordis-plugin-development (i
 - `.audit/` в репо (распакованный дистрибутив с лицензионными ключами) — удалить, когда не нужен.
 - CLAUDE.md/AGENTS.md репо — legacy-текст ниже баннера, переписать по новому контуру.
 - Клиентские конфиги Cursor/прочие переключить на 81xx (см. deploy/CLIENT-ONBOARDING.md).
-- Sol (gpt-5.6-sol) в коллегии 05.09 дважды не ответил (null) — проверить квоту/доступность.
 
 ## Ждём извне
 
