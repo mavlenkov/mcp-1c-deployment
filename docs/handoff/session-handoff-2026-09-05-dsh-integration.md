@@ -27,6 +27,9 @@ Greenfield-перестройка MCP-стека 1С на alcor ЗАВЕРШЕН
   гибрид (мост + allowlist + skill-runbook), роль Astra = эскалационный рецензент.
   Дополнения Sol: generic mcp1c_call — deny-by-default/экспертный путь, телеметрия
   (correlation id, latency), circuit breaker, приёмка включает обрыв туннеля.
+- Дефолтная модель DSH переключена kimi/k3 → **zai/glm-5.3** (страховка на
+  истечение подписки Kimi; проверена вызовом). Провайдеры: zai (API-ключ),
+  openai-codex (подписка: astra/sol/terra/luna/5.5/5.4), kimi (подписка, истекает).
 
 ## На чём остановились / следующий согласованный шаг
 
