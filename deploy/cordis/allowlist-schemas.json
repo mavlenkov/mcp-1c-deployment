@@ -1,0 +1,810 @@
+{
+ "graph": {
+  "list_graph_projects": {
+   "description": "Shared contract parameters:\n    cursor: Continuation token from the `cursor` field of a truncated response. Only valid for the same project, generation, tool and query.\n    max_items: Page size, capped by the server's hard limit. Ask for fewer items, never more.\n\n    Returns a shared response envelope (contract version 2.0): contract_version, context, total and returned, plus the payload — `items`, `text`, `nodes`/`edges` or `data` — or a typed `error`. A key that would say nothing is absent, and absent means empty, false or null: `truncated`, `truncation_reason`, `cursor` and `limits` appear only on a truncated answer, `warnings` and `degraded` only when there is something to report.",
+   "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "cursor": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "max_items": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     }
+    },
+    "type": "object"
+   }
+  },
+  "search_metadata": {
+   "description": "Shared contract parameters:\n    project_id: Graph project this call is scoped to (see list_graph_projects). Required unless the migration window is open and exactly one project is registered.\n    generation: Graph generation the answer must come from. Omit to use the active one; a generation that is no longer active fails with `stale_generation`.\n    cursor: Continuation token from the `cursor` field of a truncated response. Only valid for the same project, generation, tool and query.\n    max_items: Page size, capped by the server's hard limit. Ask for fewer items, never more.\n\n    Returns a shared response envelope (contract version 2.0): contract_version, context, total and returned, plus the payload — `items`, `text`, `nodes`/`edges` or `data` — or a typed `error`. A key that would say ",
+   "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "query": {
+      "type": "string"
+     },
+     "project_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "generation": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "cursor": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "max_items": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "type": "object"
+   }
+  },
+  "get_object_dossier": {
+   "description": "Shared contract parameters:\n    project_id: Graph project this call is scoped to (see list_graph_projects). Required unless the migration window is open and exactly one project is registered.\n    generation: Graph generation the answer must come from. Omit to use the active one; a generation that is no longer active fails with `stale_generation`.\n    cursor: Continuation token from the `cursor` field of a truncated response. Only valid for the same project, generation, tool and query.\n    max_items: Page size, capped by the server's hard limit. Ask for fewer items, never more.\n\n    Returns a shared response envelope (contract version 2.0): contract_version, context, total and returned, plus the payload — `items`, `text`, `nodes`/`edges` or `data` — or a typed `error`. A key that would say ",
+   "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "object_name": {
+      "type": "string"
+     },
+     "sections": {
+      "default": null,
+      "items": {},
+      "type": "array"
+     },
+     "project_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "generation": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "cursor": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "max_items": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     }
+    },
+    "required": [
+     "object_name"
+    ],
+    "type": "object"
+   }
+  },
+  "resolve_effective_entity": {
+   "description": "Shared contract parameters:\n    project_id: Graph project this call is scoped to (see list_graph_projects). Required unless the migration window is open and exactly one project is registered.\n    generation: Graph generation the answer must come from. Omit to use the active one; a generation that is no longer active fails with `stale_generation`.\n    cursor: Continuation token from the `cursor` field of a truncated response. Only valid for the same project, generation, tool and query.\n    max_items: Page size, capped by the server's hard limit. Ask for fewer items, never more.\n\n    Returns a shared response envelope (contract version 2.0): contract_version, context, total and returned, plus the payload — `items`, `text`, `nodes`/`edges` or `data` — or a typed `error`. A key that would say ",
+   "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "object_name": {
+      "type": "string"
+     },
+     "entity_kind": {
+      "default": "MetadataObject",
+      "type": "string"
+     },
+     "entity_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "generation": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "cursor": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "max_items": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     }
+    },
+    "required": [
+     "object_name"
+    ],
+    "type": "object"
+   }
+  },
+  "compare_base_and_extension": {
+   "description": "Shared contract parameters:\n    project_id: Graph project this call is scoped to (see list_graph_projects). Required unless the migration window is open and exactly one project is registered.\n    generation: Graph generation the answer must come from. Omit to use the active one; a generation that is no longer active fails with `stale_generation`.\n    cursor: Continuation token from the `cursor` field of a truncated response. Only valid for the same project, generation, tool and query.\n    max_items: Page size, capped by the server's hard limit. Ask for fewer items, never more.\n\n    Returns a shared response envelope (contract version 2.0): contract_version, context, total and returned, plus the payload — `items`, `text`, `nodes`/`edges` or `data` — or a typed `error`. A key that would say ",
+   "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "object_name": {
+      "type": "string"
+     },
+     "extension_name": {
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "generation": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "cursor": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "max_items": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     }
+    },
+    "required": [
+     "object_name",
+     "extension_name"
+    ],
+    "type": "object"
+   }
+  },
+  "business_search": {
+   "description": "Shared contract parameters:\n    project_id: Graph project this call is scoped to (see list_graph_projects). Required unless the migration window is open and exactly one project is registered.\n    generation: Graph generation the answer must come from. Omit to use the active one; a generation that is no longer active fails with `stale_generation`.\n    cursor: Continuation token from the `cursor` field of a truncated response. Only valid for the same project, generation, tool and query.\n    max_items: Page size, capped by the server's hard limit. Ask for fewer items, never more.\n\n    Returns a shared response envelope (contract version 2.0): contract_version, context, total and returned, plus the payload — `items`, `text`, `nodes`/`edges` or `data` — or a typed `error`. A key that would say ",
+   "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "query": {
+      "type": "string"
+     },
+     "top_k": {
+      "default": 10,
+      "type": "integer"
+     },
+     "filter_type": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "include_structure": {
+      "default": true,
+      "type": "boolean"
+     },
+     "project_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "generation": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "cursor": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "max_items": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "codemeta": {
+  "metadatasearch": {
+   "description": "Search in XML metadata files of 1C configuration.\n\nWhen ``object_type`` is provided, retrieval is constrained to matching\ntop-level metadata categories such as ``Справочники`` or ``Документы``.\n\nWhen ``names_only`` is ``True``, returns only a compact list of matching\nmetadata object names (with full_path, object_type, and synonym) instead\nof raw text chunks.  **Prefer names_only=True when you need to identify\nwhich configuration objects are relevant** — their detailed attributes\nand tabular parts can then be fetched via ``get_metadata_details``.\n\nWhile background indexing is still populating the metadata collection,\nthe tool transparently falls back to grep-level scanning of the source\n``.txt`` files and marks the response with ``search_layer: \"grep\"``.\n\nResponse budget (optional; the defa",
+   "inputSchema": {
+    "properties": {
+     "query": {
+      "type": "string"
+     },
+     "limit": {
+      "default": 5,
+      "type": "integer"
+     },
+     "object_type": {
+      "default": "",
+      "type": "string"
+     },
+     "names_only": {
+      "default": false,
+      "type": "boolean"
+     },
+     "max_chars": {
+      "default": 0,
+      "type": "integer"
+     },
+     "max_items": {
+      "default": 0,
+      "type": "integer"
+     },
+     "detail_level": {
+      "default": "",
+      "type": "string"
+     },
+     "cursor": {
+      "default": "",
+      "type": "string"
+     },
+     "origin": {
+      "default": "",
+      "type": "string"
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "type": "object"
+   }
+  },
+  "codesearch": {
+   "description": "Search in object modules and common modules of 1C.\n\nFalls back to file-level grep over ``.bsl`` when the code collection\nis still empty (background indexing in progress); response then has\n``search_layer: \"grep\"`` on success.\n\nResponse budget (optional; the defaults reproduce the previous\npayload exactly). ``max_chars`` caps the serialized response measured\non the final payload, ``max_items`` caps one page, ``detail_level`` is\n``outline`` or ``full``, and ``cursor`` continues a truncated\nresponse. Every response carries ``items_total``, ``items_returned``,\n``truncated`` and ``next_cursor`` with the compact query API's\nsemantics; every item carries ``item_id``, ``location``\n(``file:start:end``) and ``evidence_path``.\n\n``origin`` scopes the result to where the code came from\n(CODE-SAVED-1126",
+   "inputSchema": {
+    "properties": {
+     "query": {
+      "type": "string"
+     },
+     "limit": {
+      "default": 5,
+      "type": "integer"
+     },
+     "max_chars": {
+      "default": 0,
+      "type": "integer"
+     },
+     "max_items": {
+      "default": 0,
+      "type": "integer"
+     },
+     "detail_level": {
+      "default": "",
+      "type": "string"
+     },
+     "cursor": {
+      "default": "",
+      "type": "string"
+     },
+     "origin": {
+      "default": "",
+      "type": "string"
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "syntax": {
+  "syntaxcheck": {
+   "description": "Analyzes BSL code for syntax errors using bsl-analyzer.\n\nThis tool takes a string of BSL code, saves it to a temporary file,\nruns bsl-analyzer on it, and returns the analysis report as a string\nin TOON format (one document under an \"events\" key: a \"start\" event, a\n\"file\" event whose diagnostics are written as one table, and a \"done\"\nsummary event).\n\n'file_name' says what the code is: give it 'ObjectModule.bsl' and the\nanalyzer sees an object module under that name, and every location in the\nanswer is that name rather than a temporary path of this server's. It is a\nname and not a location - a path separator, a parent segment, an absolute\nor drive-qualified form, a control character, an empty stem or an extension\nbsl-analyzer does not read fails the call with the reason rather than being\nqui",
+   "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "description": "A string containing the BSL code to be analyzed.",
+      "type": "string"
+     },
+     "file_name": {
+      "default": "",
+      "description": "Optional logical module name for the submitted code, e.g. \"ObjectModule.bsl\". A bare file name ending in .bsl - never a path. Empty analyses the code under a generic name.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "code"
+    ],
+    "type": "object"
+   }
+  },
+  "syntaxcheck_file": {
+   "description": "Analyzes a BSL file from the mounted files directory for syntax errors.\n\nThis is a project-file read mode, and that is its contract, and where\na directory is mounted it is the way to check code that lives in it:\nthe file is analysed under its own name and in its own place, and\n`syntaxcheck` is for code that has no file yet.\n\nWhat this tool can say depends on whether the container keeps an index.\nWithout one - the default - three diagnostics are switched off, because\na call analysing one module cannot resolve a call, a field or a query's\nmetadata against the rest of the configuration and would report every\ncross-module reference as unresolved. Started with FULLINDEX=true the\ncontainer indexes the mounted directory and takes those three from that\nindex once it is ready, which costs seconds p",
+   "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "file_path": {
+      "description": "Path to the BSL file, relative to the mounted files directory.",
+      "type": "string"
+     },
+     "lines": {
+      "default": "",
+      "description": "Optional 1-based lines to check, e.g. \"5, 10-20, 35\". Empty string checks the whole file.",
+      "type": "string"
+     }
+    },
+    "required": [
+     "file_path"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "help": {
+  "docsearch": {
+   "description": "Searches 1C platform syntax documentation using a hybrid approach.\nDon't mention in query that you need 1C code or syntax, tool will return only 1C related info.\nUse this when you need to find documentation by description, question, or partial name.\nIf you know the exact object or method name, use docinfo instead.\n\nArgs:\n    query: The search term or question in Russian.\n    top_k: How many matching documents the answer may contain at all. Omitted,\n           every document that clears the relevance threshold is a result.\n           This bounds the result set; max_items bounds one page of it.\n    doc_type: Restrict the answer to one kind of page - \"method\", \"property\",\n              \"constructor\", \"event\", \"object\", \"type\", \"structure\" or\n              \"other\". An unknown kind is refused, ",
+   "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "query": {
+      "type": "string"
+     },
+     "top_k": {
+      "anyOf": [
+       {
+        "anyOf": [
+         {
+          "maximum": 50,
+          "minimum": 1,
+          "type": "integer"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "How many matching documents the answer may contain at all. Omitted, every document that clears the relevance threshold is a result and max_items bounds how many of them one response carries."
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "doc_type": {
+      "anyOf": [
+       {
+        "anyOf": [
+         {
+          "enum": [
+           "method",
+           "property",
+           "constructor",
+           "event",
+           "object",
+           "type",
+           "structure",
+           "other"
+          ],
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "Restrict the answer to one kind of documentation page. The kinds are the ones recorded when the corpus was indexed: method, property, constructor, event, object, type, structure, other."
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "scope": {
+      "anyOf": [
+       {
+        "anyOf": [
+         {
+          "enum": [
+           "syntax",
+           "docs",
+           "all"
+          ],
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "Which documentation to search. Omitted, every kind may answer. 'syntax' is the platform syntax reference - one page per object, method, property or event. 'docs' is the prose: guides, tutorials, the glossary and the query-language book. 'all' is every kind, stated explicitly. Format specifications and development standards have tools of their own and are reached through those."
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "max_chars": {
+      "default": 20000,
+      "description": "Hard cap on the size of the serialized response, in characters.",
+      "maximum": 400000,
+      "minimum": 512,
+      "type": "integer"
+     },
+     "max_items": {
+      "default": 5,
+      "description": "Maximum number of documents in the response.",
+      "maximum": 50,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "detail_level": {
+      "default": "detailed",
+      "description": "'detailed' returns whole document bodies, 'compact' a short sample of each: the snippets the query reached, in the document's own order.",
+      "enum": [
+       "detailed",
+       "compact"
+      ],
+      "type": "string"
+     },
+     "cursor": {
+      "anyOf": [
+       {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "description": "The 'next_cursor' of a previous response, to continue after the documents it returned."
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null
+     },
+     "diagnostics": {
+      "default": false,
+      "description": "Add a report of how the answer was retrieved: which lanes ran and what each contributed, how they were fused, the relevance thresholds applied, the index generation, and where in its document each hit sits. Off by default - it is for debugging retrieval, and it is paid for out of the same max_chars that would otherwise carry documentation.",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "ssl": {
+  "ssl_search": {
+   "description": "Searches for functions in 1C 'БСП'(SSL) - standard subsystems library.\nThis tool should always be used if 'БСП'(SSL) present in 1C configuration.\nSearches through the SSL (Standard Subsystems Library) documentation using vector search.\nquery can be method description of method name, or some text, describing what are you going to do\n\nEach hit is rendered as a citation header followed by the entry, and the\nhits are separated by '---':\n\n    [database=3111.db version=3.1.11 doc_id=3111.db_42\n     source=3111.db#functions section=\"Базовая функциональность\"\n     lane=semantic score=0.9269 (similarity, higher is more relevant)]\n    <the entry>\n\nThe header is one line. `database` is the BSP database the entry came\nfrom, `version` the BSP version this server resolved, `doc_id` the\nidentifier the in",
+   "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "query": {
+      "type": "string",
+      "description": "The search term or question in Russian."
+     },
+     "limit": {
+      "default": 5,
+      "maximum": 20,
+      "minimum": 1,
+      "type": "integer",
+      "description": "How many hits to return, from 1 to 20. Defaults to 5."
+     },
+     "min_score": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "The lowest score a hit may have. Defaults to this\nserver's calibrated relevance floor."
+     },
+     "database": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Return hits from this BSP database only, for example\n'3111.db'. Defaults to every database this server serves."
+     },
+     "detail": {
+      "anyOf": [
+       {
+        "enum": [
+         "compact",
+         "full"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "'compact' for a citation and a bounded excerpt, 'full' for\nwhole entries. Defaults to 'compact'."
+     },
+     "cursor": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "An opaque handle from a truncated answer, to receive the\nhits it left out. Defaults to no continuation."
+     },
+     "doc_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Fetch this one entry in full instead of searching. Defaults\nto searching."
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "templates": {
+  "templatesearch": {
+   "description": "Searches the 1C code template or some additional context for a given query.\n\nArgs:\n    query: The search term or question in Russian, describing the desired functionality or some case\n\nReturns:\n    A formatted string with context or code",
+   "inputSchema": {
+    "properties": {
+     "query": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "type": "object"
+   }
+  }
+ },
+ "checker": {
+  "check_1c_code": {
+   "description": "Basic check of 1C:Enterprise code — syntax errors, logical issues, and performance problems.\nUse this tool for a technical correctness check: will the code compile, are there bugs,\nare there N+1 queries or other performance anti-patterns.\n\nIn direct mode the upstream syntax capability produces both the syntax result and the\nlogic-and-performance analysis within a single discussion. When that capability is not\navailable, or the call does not succeed, the answer comes from the prompt path and the\nresult carries a machine-readable `fallback_reason` saying which capability was\nconcerned and what state it resolved to.\n\nFor style/standards compliance, use review_1c_code instead.\nFor an AI-proposed rewrite of the code, use rewrite_1c_code instead.",
+   "inputSchema": {
+    "additionalProperties": false,
+    "properties": {
+     "code": {
+      "default": "",
+      "type": "string",
+      "description": "1C code to check"
+     },
+     "files": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Paths to read the code from instead of passing it inline. Prefer this for\nanything large: the server reads the file, so nothing is lost assembling the\nargument. Give a path relative to the repository root the server has mounted\n(e.g. CommonModules/Модуль/Ext/Module.bsl) or an absolute path inside a\ndirectory named by ONEC_AI_WORKSPACE_ROOTS (in the container: /workspace/...).\nThe server runs in its own container, so a path on your own machine (a\ndrive-letter path, /home/...) is not visible to it unless the operator\ndeclared that prefix in ONEC_AI_WORKSPACE_PATH_MAP. Read only; a path outside\nthe declared directories is refused, and a deployment that set nothing\nrefuses every path. Give either code or files, not both."
+     }
+    },
+    "type": "object"
+   }
+  }
+ }
+}
